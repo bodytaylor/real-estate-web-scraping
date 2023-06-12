@@ -1,0 +1,9 @@
+services:
+  pyspark-notebook:
+    build: .
+    container_name: my_container
+    image: bkk-properties-pyspark:3.4.0
+    volumes:
+      - .:/code
+    ports: 
+    - 8888:8888

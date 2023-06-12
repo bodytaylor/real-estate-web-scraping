@@ -8,7 +8,6 @@ import re
 import os.path
 
 
-
 # adding user agents to avoid detection
 header = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.66 Safari/537.36"} 
 # base url for the pages
@@ -30,26 +29,27 @@ def loop_number():
     response = requests.get(base_url, headers=header)
     soup = BeautifulSoup(response.text,'lxml')
     dom = et.HTML(str(soup))
-    page_number = int(dom.xpath('//*[@id="search-result"]/div[4]/ul/li[7]/a/text()')[0].strip()) # get area
+    page_number = int(dom.xpath('//*[@id="search-result"]/div[4]/ul/li[7]/a/text()')[0].strip()) # get footer
     page_number = page_number + 1
     return page_number
 
-for i in range(5, 6):                   # generate all the pages url
+for i in range(0, loop_number() - 332):                   # generate all the pages url
     page_url=base_url + str(i)
     pages_url.append(page_url)          # append the page url to the list
+    print(page_url)
 
 
 def get_listing_url(page_url):          # get the url of the listing
     dom = get_dom(page_url)
-    page_link_list=dom.xpath('//*[@id="search-result"]/div[3]/ul/li/a/@href')
+    page_link_list=dom.xpath('//a[contains(@class, "link-unit")]//@href')
     for page_link in page_link_list:
         listing_url.append(str(page_link))
+    print("Number of Listed Properties: ",len(listing_url))
 
 
 for page_url in pages_url:              # for each page url, get the listing url
     get_listing_url(page_url)
     time.sleep(random.randint(1,10))
-
 
 def get_title(dom):                     # get the title of the listing
     try:                                # try to get the title
@@ -197,9 +197,9 @@ def get_est_rent(dom):                  # check if the estimate rent per month i
     return est_rent
 
 # write to csv file
-file_exists = os.path.isfile('bangkok_condo.csv')
+file_exists = os.path.isfile('/code/data/bangkok_condo.csv')
 
-with open('bangkok_condo.csv', 'a', newline='') as f:
+with open('/code/data/bangkok_condo.csv', 'a', newline='') as f:
     thewriter = writer(f)
     if not file_exists:  # write header row only once
         heading = ['title', 'location', 'price', 'room_size_sqm', 'listing_date', 'cam_free_per_month', 'property_type', 'is_finish_construct', 'constructed_year', 'bedrooms', 'bathrooms', 'no_floors', 'balcony_view', 'room_furniture', 'estimate_rent_per_month', 'url']    
